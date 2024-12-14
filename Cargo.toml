@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "crates/plugin_core",
+    "crates/cli",
+    "crates/wasm"
+]
+

@@ -1,0 +1,25 @@
+{
+  "name": "lambda-bookmark-browser-plugin",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Parker Jones <parker.jones@rithum.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "rolldown": "^0.15.0",
+    "tailwindcss": "^3.4.16",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "vue": "^3.5.13"
+  },
+  "dependencies": {
+    "@surrealdb/wasm": "^1.1.0",
+    "js-yaml": "^4.1.0",
+    "surrealdb": "^1.1.0",
+    "unique-names-generator": "^4.7.1",
+    "vite-plugin-static-copy": "^2.2.0",
+    "vue-router": "4"
+  }
+}

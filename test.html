@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StackFinder</title>
+</head>
+<body>
+    <h1>StackFinder</h1>
+    <input type="text" id="title" placeholder="Title">
+    <input type="text" id="url" placeholder="URL">
+    <button id="addBookmark">Add Bookmark</button>
+
+    <script type="module">
+        import init, { add_bookmark } from './pkg/stackfinder.js';
+
+        async function run() {
+            await init();
+            document.getElementById('addBookmark').addEventListener('click', async () => {
+                const title = document.getElementById('title').value;
+                const url = document.getElementById('url').value;
+                const result = await add_bookmark(title, url);
+                console.log(result);
+            });
+        }
+
+        run();
+    </script>
+</body>
+</html>

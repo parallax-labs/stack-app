@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Deployment Stack Navigator",
+  "version": "0.2",
+  "description": "Navigate software deployment stacks with quick links.",
+  "action": {
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "side_panel": {
+    "default_path": "sidebar/sidebar.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["sidePanel", "scripting", "storage", "tabs", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["index_bg.wasm"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
+

@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add a test class */
+.test-tailwind {
+  @apply text-red-500;
+}
+
