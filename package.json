@@ -16,7 +16,11 @@
   },
   "dependencies": {
     "@surrealdb/wasm": "^1.1.0",
+    "@types/chrome": "^0.0.287",
     "js-yaml": "^4.1.0",
+    "llamaindex": "^0.8.30",
+    "marked": "^15.0.4",
+    "openai": "^4.77.0",
     "surrealdb": "^1.1.0",
     "unique-names-generator": "^4.7.1",
     "vite-plugin-static-copy": "^2.2.0",

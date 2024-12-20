@@ -21,7 +21,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { createStack, Stack } from '../db.ts';
+import { createStack } from '../db';
 const router = useRouter();
 const name = ref('');
 const platform = ref('aws');

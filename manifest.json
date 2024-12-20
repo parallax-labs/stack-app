@@ -3,6 +3,22 @@
   "name": "Deployment Stack Navigator",
   "version": "0.2",
   "description": "Navigate software deployment stacks with quick links.",
+  "commands": {
+    "bookmark_resource": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+9"
+      },
+      "description": "Bookmark Page",
+      "global": true
+    },
+    "open_sidebar": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+8"
+      },
+      "description": "Open Sidebar",
+      "global": true
+    }
+  },
   "action": {
     "default_icon": {
       "16": "icons/icon-16.png",
@@ -14,7 +30,7 @@
     "default_path": "sidebar/sidebar.html"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "dist/background.js"
   },
   "permissions": ["sidePanel", "scripting", "storage", "tabs", "activeTab"],
   "host_permissions": ["<all_urls>"],
@@ -23,7 +39,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["index_bg.wasm"],
+      "resources": ["index_bg.wasm", "icons/*.png"],
       "matches": ["<all_urls>"]
     }
   ]

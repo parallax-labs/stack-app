@@ -7,10 +7,9 @@ import App from './App.vue';
 import router from './router';
 
 import { initDB } from './db';
+import { generateAndStoreSecretKey } from './encryption';
 
-
-(async () => {
-  await initDB(); // Initialize and configure SurrealDB
-  createApp(App).use(router).mount('#app');
-})();
+await generateAndStoreSecretKey();
+await initDB(); // Initialize and configure SurrealDB
+createApp(App).use(router).mount('#app');
 

@@ -1,25 +1,27 @@
 <template>
-  <div class="min-h-screen bg-white shadow-md rounded-lg p-6 max-w-5xl mx-auto">
-      <nav class="flex space-x-4 mb-6 border-b pb-2 justify-center">
-        <router-link to="/chat" class="tab-link" active-class="tab-link-active">
-         💬
-        </router-link>
-        <router-link to="/stacks" class="tab-link" active-class="tab-link-active">
-          📦
-        </router-link>
-        <router-link to="/components" class="tab-link" active-class="tab-link-active">
-          🧩
-        </router-link>
-        <router-link to="/resources" class="tab-link" active-class="tab-link-active">
-          🔖
-        </router-link>
-        <router-link to="/" class="tab-link" active-class="tab-link-active">
-         ⚙️
-        </router-link>
-      </nav>
-      <router-view />
+  <nav class="fixed top-0 left-0 w-full z-50 bg-white">
+    <div class="flex space-x-4 border-b justify-center">
+      <router-link to="/chats" class="tab-link" active-class="tab-link-active">
+        📦
+      </router-link>
+      <router-link to="/resources" class="tab-link" active-class="tab-link-active">
+        🔖
+      </router-link>
+      <router-link to="/" class="tab-link" active-class="tab-link-active">
+        ⚙️
+      </router-link>
+    </div>
+    <NavigationBar />
+  </nav>
+  <div class="pt-24">
+    <router-view />
   </div>
 </template>
+
+
+<script setup lang="ts">
+import NavigationBar from './components/NavigationBar.vue';
+</script>
 
 <style scoped>
 .tab-link {

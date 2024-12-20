@@ -8,9 +8,11 @@ import ResourceView from '../views/ResourceView.vue';
 import ResourceSingle from '../views/ResourceSingle.vue';
 import AboutView from '../views/AboutView.vue';
 import ChatView from '../views/ChatView.vue';
+import ChatsView from '../views/ChatsView.vue';
 
 const routes: RouteRecordRaw[] = [
-  { path: '/chat', component: ChatView },
+  { path: '/chats', name: 'ChatsView', component: ChatsView },
+  { path: '/chat/:chatId', name: 'ChatView', component: ChatView, props: true },
   { path: '/stacks', component: HomeView },
   { path: '/create-stack', component: CreateStack },
   { path: '/stack/:id', component: StackView, props: true },

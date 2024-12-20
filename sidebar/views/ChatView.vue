@@ -1,15 +1,25 @@
 <template>
-  <div class="flex flex-col h-screen p-4 bg-gray-100">
+  <div class="flex flex-col h-screen bg-white shadow-md rounded-lg max-w-5xl mx-auto">
     <!-- Header -->
-    <div class="mb-4">
-      <h1 class="text-xl font-semibold text-gray-700">Chat with Stack Assistant</h1>
-      <p class="text-sm text-gray-500">Ask questions about your stacks and resources.</p>
+    <div class="flex-none p-4 bg-white shadow-md">
+      <p class="text-sm text-gray-500">{{ chatId }}</p>
     </div>
 
     <!-- Chat Messages Container -->
-    <div class="flex-1 overflow-y-auto mb-4 bg-white rounded shadow p-4 space-y-2">
-      <div v-for="(message, index) in messages" :key="index" class="flex items-start" :class="message.sender === 'user' ? 'justify-end' : ''">
-        <div class="max-w-xs px-4 py-2 rounded-lg" :class="message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'">
+    <div
+      ref="messagesContainer"
+      class="flex-1 overflow-y-auto p-4 space-y-2"
+    >
+      <div
+        v-for="(message, index) in messages"
+        :key="index"
+        class="flex"
+        :class="message.sender === 'user' ? 'justify-end' : 'justify-start'"
+      >
+        <div
+          class="max-w-xs px-4 py-2 rounded-lg"
+          :class="message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+        >
           <p v-html="formatMessage(message)"></p>
         </div>
       </div>
@@ -17,76 +27,127 @@
       <div v-if="isLoading" class="text-gray-500 text-sm mt-2">Assistant is typing...</div>
     </div>
 
-    <!-- Error Message -->
-    <div v-if="error" class="text-red-500 mb-2">{{ error }}</div>
-
     <!-- Input Bar -->
-    <div class="flex items-center">
-      <input
-        v-model="inputMessage"
-        @keyup.enter="sendMessage"
-        placeholder="Type your message..."
-        class="flex-1 px-3 py-2 border rounded-l focus:outline-none focus:ring focus:border-blue-300"
-      />
-      <button @click="sendMessage" class="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600">
-        Send
-      </button>
+    <div class="flex-none p-4 bg-white shadow-md">
+      <div class="flex items-center">
+        <textarea
+          v-model="inputMessage"
+          @keyup.enter="sendMessage"
+          placeholder="Type your message..."
+          class="flex-1 px-3 py-2 border rounded-l focus:outline-none focus:ring focus:border-blue-300 resize-y"
+          :disabled="isLoading"
+          rows="1"
+        ></textarea>
+        <label for="file-input" class="bg-gray-200 text-gray-600 px-4 py-2 border-t border-b border-gray-300 cursor-pointer hover:bg-gray-300">
+          📎
+        </label>
+        <input
+          id="file-input"
+          type="file"
+          class="hidden"
+          @change="handleFileUpload"
+        />
+        <button
+          @click="sendMessage"
+          class="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600 disabled:bg-gray-400"
+          :disabled="isLoading"
+        >
+          Send
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
-import { querySurrealDB, saveMessageToDB, loadChatHistory } from '../db'
+import { ref, onMounted, nextTick, defineProps } from 'vue';
+import { marked } from 'marked';
+import { saveMessageToDB, loadChatHistory } from '../db';
+import { agentQuery } from '../oaClient.ts';
+import {bookmarkAssistant} from '../agents/index';
 
-// State for messages and input
-const messages = ref<{ sender: string; text: string }[]>([])
-const inputMessage = ref('')
-const isLoading = ref(false)
-const error = ref<string | null>(null)
+const props = defineProps<{ chatId: string }>();
 
-// Load chat history on mount
+const chatId = ref<string>(props.chatId);
+const messages = ref<{ sender: string; text: string }[]>([]);
+const inputMessage = ref('');
+const isLoading = ref(false);
+const error = ref<string | null>(null);
+const messagesContainer = ref<HTMLElement | null>(null);
+let agent: Agent;
+
 onMounted(async () => {
-  messages.value = await loadChatHistory()
-})
+  messages.value = await loadChatHistory(props.chatId);
+  scrollToBottom();
+});
 
-// Function to send a message
 const sendMessage = async () => {
-  if (!inputMessage.value.trim()) return
+  if (!inputMessage.value.trim() || isLoading.value) return;
+  if (!agent) {
+    agent = await bookmarkAssistant(chatId.value);
+  }
+  const userMessage = { sender: 'user', text: inputMessage.value };
+  messages.value.push(userMessage);
+  await saveMessageToDB(props.chatId, userMessage);
 
-  const userMessage = { sender: 'user', text: inputMessage.value }
-  messages.value.push(userMessage)
-  await saveMessageToDB(userMessage)
-
-  const userInput = inputMessage.value
-  inputMessage.value = ''
-  isLoading.value = true
-  error.value = null
+  const userInput = inputMessage.value;
+  inputMessage.value = '';
+  isLoading.value = true;
+  error.value = null;
 
   try {
-    const response = await fetch('https://your-llm-api-endpoint.com/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: userInput })
-    })
+    console.log("query agent", agent);
+    const data = await agent.query(userInput);
 
-    if (!response.ok) throw new Error('Failed to fetch response from the assistant.')
+    let formattedResponse = data.content ?? 'No response.';
 
-    const data = await response.json()
-    const assistantMessage = { sender: 'assistant', text: data.reply }
-    messages.value.push(assistantMessage)
-    await saveMessageToDB(assistantMessage)
+    if (data.function_call && data.function_call.name === 'listBookmarks') {
+      const bookmarks = JSON.parse(data.function_call.arguments);
+      formattedResponse += '\n' + bookmarks.map(
+        (bookmark: { title: string; url: string }) =>
+          `- [${bookmark.title}](${bookmark.url})`
+      ).join('\n');
+    }
+
+    const assistantMessage = { sender: 'assistant', text: formattedResponse };
+    messages.value.push(assistantMessage);
+    await saveMessageToDB(props.chatId, assistantMessage);
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'An unexpected error occurred.'
+    error.value = err instanceof Error ? err.message : 'An unexpected error occurred.';
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
+    await nextTick();
+    scrollToBottom();
   }
-}
+};
 
-// Format message to support rich text (e.g., links)
+const scrollToBottom = () => {
+  if (messagesContainer.value) {
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+  }
+};
+
+const parseMarkdown = (text: string) => {
+  //return marked.parse(text);
+
+  return text
+};
+
 const formatMessage = (message: { text: string }) => {
-  return message.text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="underline text-blue-600">$1</a>')
-}
+  const formattedLinks = message.text.replace(
+    /(https?:\/\/[^\s]+)/g,
+    '<a href="$1" target="_blank" class="underline text-blue-600">$1</a>'
+  );
+  return parseMarkdown(formattedLinks);
+};
+
+const handleFileUpload = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    const file = input.files[0];
+    console.log('File selected:', file.name);
+  }
+};
 </script>
 
 <style scoped>
