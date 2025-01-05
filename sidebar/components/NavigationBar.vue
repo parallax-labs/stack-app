@@ -43,13 +43,21 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { createChatInDB } from '../db';
+import { useRouter, useRoute } from 'vue-router';
+import { createBookmarkEvent, createChatSessionEvent, addResourceToChat, createChatInDB, upsertResource } from '../db';
 
 const router = useRouter();
-const navigationStack = ref<string[]>([]);
-const currentIndex = ref(-1);
-const searchQuery = ref('');
+const route = useRoute();
+const bookmarkCurrentPage = async () => {
+  chrome.tabs.query({ currentWindow: true, active: true }, async ([tab]) => {
+    await createBookmarkEvent(tab.url, {
+      ...tab,
+      chatId: router.currentRoute.value.params.chatId
+    })
+  });
+
+}
+
 
 const navigateBack = () => {
   router.back();

@@ -1,9 +1,4 @@
 <template>
-  <div class="min-h-screen bg-white shadow-md rounded-lg p-6 max-w-5xl mx-auto">
-    <!-- Header -->
-  <!-- <div class="flex flex-wrap justify-center gap-4 mb-6"> -->
-  <!--   <NavigationBar /> -->
-  <!-- </div> -->
     <div class="flex-1 overflow-y-auto bg-white rounded shadow p-4">
       <ul>
         <li
@@ -19,7 +14,6 @@
       </ul>
       <p v-if="resources.length === 0" class="text-gray-500 text-sm">No resources available.</p>
     </div>
-  </div>
 </template>
 
 <script setup>

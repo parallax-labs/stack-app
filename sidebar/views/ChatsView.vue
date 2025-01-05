@@ -19,20 +19,18 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import { getAllChats, createChatInDB, deleteChatFromDB, getAllStacks } from '../db'
+import { getAllChats, createChatInDB, deleteChatFromDB } from '../db'
 import { useRouter } from 'vue-router'
 import NavigationBar from '../components/NavigationBar.vue';
 
 const router = useRouter()
 const chats = ref<{ id: string; name: string; stackId: string }[]>([])
-const stacks = ref<{ id: string; name: string }[]>([])
 const newChatName = ref('')
 const selectedStack = ref('')
 
 // Load chats and stacks on mount
 onMounted(async () => {
   chats.value = await getAllChats()
-  stacks.value = await getAllStacks()
 })
 
 // Create a new chat
@@ -52,11 +50,6 @@ const deleteChat = async (chatId: string) => {
   chats.value = await getAllChats()
 }
 
-// Get stack name by ID
-const getStackName = (stackId: string) => {
-  const stack = stacks.value.find((s) => s.id === stackId)
-  return stack ? stack.name : 'Unknown Stack'
-}
 </script>
 
 <style scoped>
