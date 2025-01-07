@@ -1,7 +1,7 @@
 <template>
   <div class="h-screen flex flex-col bg-gray-100">
     <!-- Header -->
-    <div class="p-4 border-b bg-white">
+    <div class="p-4 border-b bg-white flex-col">
       <SearchBar @search="handleSearch" />
       <SortOptions @sort="handleSort" />
     </div>
@@ -23,7 +23,7 @@ import SearchBar from '../components/SearchBar.vue';
 import SortOptions from '../components/SortOptions.vue';
 import BookmarkTree from '../components/BookmarkTree.vue';
 import { getBookmarks } from '../browser';
-
+import { appEvent } from '../db';
 export default {
   components: { SearchBar, SortOptions, BookmarkTree },
   data() {
@@ -36,7 +36,7 @@ export default {
     try {
       const data = await getBookmarks();
       this.bookmarks = data;
-      this.filteredBookmarks = data;
+      this.filteredBookmarks = [...data[0].children];
     } catch (error) {
       console.error('Error fetching bookmarks:', error);
     }
@@ -59,7 +59,7 @@ export default {
       this.filteredBookmarks = this.sortBookmarks(this.filteredBookmarks, criteria);
     },
 
-    async addFolder(parentId, name) {
+  async addFolder(parentId, name) {
       try {
         const newFolder = await new Promise((resolve) => {
           chrome.bookmarks.create(
@@ -71,7 +71,7 @@ export default {
         const parentNode = this.findNodeById(this.bookmarks, parentId);
         if (parentNode && parentNode.children) {
           parentNode.children.push({ ...newFolder, children: [] });
-          this.filteredBookmarks = [...this.bookmarks];
+          this.filteredBookmarks = this.filterBookmarks();
         }
       } catch (error) {
         console.error('Error adding folder:', error);
@@ -96,9 +96,9 @@ export default {
       }
     },
 
-    chat(...args) {
+    async chat(node) {
       // Logic to rename a node
-      console.log("chat with me", args)
+      await appEvent('CREATE_CHAT', node);
     },
     deleteNode(id) {
       // Logic to delete a node
@@ -107,7 +107,7 @@ export default {
       console.log(query)
       if (!query || query === '') {
         // If no query, reset to full tree
-        this.filteredBookmarks = [...this.bookmarks];
+        this.filteredBookmarks = [...this.bookmarks[0].children];
         return;
       }
 

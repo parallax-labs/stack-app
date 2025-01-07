@@ -4,6 +4,12 @@
       <router-link to="/" class="tab-link" active-class="tab-link-active">
         🏠
       </router-link>
+      <router-link to="/timeline" class="tab-link" active-class="tab-link-active">
+        🗓️
+      </router-link>
+      <router-link to="/sessions" class="tab-link" active-class="tab-link-active">
+        💬
+      </router-link>
       <router-link to="/bookmarks" class="tab-link" active-class="tab-link-active">
         📚
       </router-link>
@@ -25,45 +31,43 @@ import { getBookmarks, findMaxBookmarkDate, buildPathsToLeafNodes, findFoldersWi
 
 import { onMounted } from 'vue';
 const router = useRouter();
-const openChat = (chatId: string) => {
-  router.push({ name: 'ChatView', params: { chatId } })
+const openChat = ({ chat }) => {
+  router.push({ name: 'ChatView', params: { chatId: chat.id.toString() } })
 }
-const createChatHandler = async ({ tabs }: { tabs: Tab[] }) => {
-  let chat = await createChatInDB();
-  await Promise.all(
-    tabs
-    .filter(tab => tab.url && tab.title)
-    .map(tab => saveResource(chat.id, {title: tab.title!, url: tab.url! }))
-  );
+const createChatNodeHandler = async ({ title, url, children }: { title: string, url?: string | null, children?: chrome.bookmarks.BookmarkTreeNode[] }) => {
+  let chat = await getOrCreateChat(title);
+  let bookmarks = (await getBookmarks())[0];
+  const saveResourceCB = async (node) => {
+    const paths = findPathToUrl(bookmarks, node.url);
+    const title = (paths || [node.title]).join("/");
+    if (node.url) {
+      let resource = {
+        title
+        , url: node.url
+      };
+      await saveResource(chat.id, resource);
+    }
+    if (node.children) {
+      await Promise.all(
+        node.children
+          .filter(child => !!child.url)
+          .map(saveResourceCB)
+      )
+    }
 
+  }
+  
+  await saveResourceCB({ title, url, children })
   await appEvent('OPEN_CHAT', { chat: chat });
 }
+
+
 const eventMap = {
   ["OPEN_CHAT"]: openChat,
-  ["CREATE_CHAT"]: createChatHandler,
+  ["CREATE_CHAT"]: createChatNodeHandler,
   ["INIT_APP"]: initializeApp,
-  ["UPSERT_BOOKMARK_BATCH"]: batchUpsertBookmarks
+  ["UPSERT_BOOKMARK_BATCH"]: batchUpsertBookmarks,
 };
-const importChromeBookmarks = async (rootNode) => {
-    let imported = buildPathsToLeafNodes(rootNode);
-    let bookmarks = await Promise.all(imported.flatMap((resource) => upsertResource(resource)));
-    console.log(Promise.all(bookmarks.flatMap(async bookmark => {
-      const chats = await Promise.all(bookmark.path.map(getOrCreateChat));
-      return await addResourceToChats(bookmark.id.id, chats.map(chat => chat.id.toString()));
-    })));
-}
-const importTypeMap = {
-  chrome: async (result) => {
-    try {
-      await importBookmarkTreeInBatches(result.data);
-    } catch (error) {
-      console.error(error);
-      appEvent('IMPORT_FAILED', { error });
-
-    }
-    appEvent('IMPORT_COMPLETE', {});
-  }
-}
 
 onMounted(async () => {
   await db.live("app_event", async (action: any, result: any) => {
@@ -75,27 +79,13 @@ onMounted(async () => {
       await eventHandler(eventProps);
     }
   });
-  await db.live("import", async (action: any, result: any) => {
-     if (action === "CREATE" && typeof importTypeMap[result.source] === "function") {
-      await importTypeMap[result.source](result);
-    } else {
-      console.log("no such import type", result);
-    }
-  });
+
   appEvent('INIT_APP', { bookmarks: await getBookmarks() })
 });
 
 // Function to initialize the app by processing bookmarks
-async function initializeApp({ bookmarks: [bookmarks] }) {
-  //if (true) {
-  if (findMaxBookmarkDate(bookmarks) > await getLatestTimestamp('chrome')) {
-    try {
-      await createImport('chrome', bookmarks);
-    } catch (err) {
-      console.log(err);
-      throw err;
-    }
-  }
+async function initializeApp(initProps) {
+    appEvent('IMPORT_COMPLETE', initProps);
 }
 
 </script>

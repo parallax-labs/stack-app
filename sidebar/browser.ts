@@ -5,7 +5,7 @@ interface BookmarkDiff {
   modified: { oldNode: BookmarkTreeNode; newNode: BookmarkTreeNode }[];
 }
 
-export async function getActiveTab() {
+export async function getActiveTab(): Promise<{url: string, title: string }> {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
@@ -29,7 +29,12 @@ export const loadTabs = async () => {
   });
 };
 
-export const getBookmarks = async () => {
+export const currentTabIsBookmarked = async () => {
+  let activeTab = await getActiveTab();
+  return activeTab && activeTab.url != '' ? (await chrome.bookmarks.search({ url: activeTab.url }) ?? []).length > 0 : false;
+}
+
+export const getBookmarks = async (): Promise<chrome.bookmarks.BookmarkTreeNode[]> => {
   return new Promise((resolve, reject) => {
     chrome.bookmarks.getTree((tree) => {
       if (chrome.runtime.lastError) {

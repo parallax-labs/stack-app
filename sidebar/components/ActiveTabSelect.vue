@@ -1,21 +1,36 @@
 <template>
-    <div class="select-all-row pl-2">
-      <input 
-        type="checkbox" 
-        v-model="selectAll" 
-        @change="toggleSelectAll" 
-        class="tab-checkbox"
-      />
-    <button 
-      class="open-chat-button" 
-      @click="openChatWithSelectedTabs" 
-      :disabled="selectedTabs.length === 0">
-      Open Chat with Selected Pages
-    </button>
+    <!-- Persistent Header -->
+    <div class="flex p-4 border-b bg-white flex-col">
+      <SearchBar @search="handleSearch" placeholder="Search browsing history" />
+      <div class="select-all-row pt-2">
+        <div class="action-bar">
+          <input
+            type="checkbox"
+            v-model="selectAll"
+            @change="toggleSelectAll"
+            class="tab-checkbox"
+          />
+          <label>Select All</label>
+          <button
+            class="action-button"
+            @click="openChatWithSelectedTabs"
+            :disabled="selectedTabs.length === 0"
+          >
+            Open Session
+          </button>
+          <button
+            class="action-button delete-button"
+            @click="deleteSelectedTabs"
+            :disabled="selectedTabs.length === 0"
+          >
+            Delete All Selected
+          </button>
+        </div>
+      </div>
     </div>
   <div class="tab-list">
     <div 
-      v-for="tab in tabs" 
+      v-for="tab in filteredTabs" 
       :key="tab.id" 
       :class="['tab-item', { active: tab.active }]" 
       @click="tabClickAction(tab)"
@@ -41,25 +56,36 @@
             <a :href="chat.url" target="_blank">Chat {{ index + 1 }}</a>
             <span v-if="index < tab.chats.length - 1">, </span>
           </span>
-</div>
+        </div>
       </div>
       <div class="tab-actions">
         <span class="close-tab" @click.stop="closeTab(tab)">&times;</span>
       </div>
     </div>
-
-
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import Tab from '../bookmark_event.ts';
-import { loadResourcesBatch, createChatEvent } from '../db';
+import { loadResourcesBatch, appEvent } from '../db';
+import SearchBar from '../components/SearchBar.vue';
+import SortOptions from '../components/SortOptions.vue';
 
-const tabs = ref([]);
-const selectedTabs = ref([]);
+const tabs = ref<Tab[]>([]);
+const selectedTabs = ref<Tab[]>([]);
 const selectAll = ref(true);
+const searchQuery = ref('');
+
+
+
+// Watch selectedTabs to update selectAll
+watch(
+  () => selectedTabs.value,
+  () => {
+    selectAll.value = allTabsSelected.value;
+  }
+);
 
 onMounted(async () => {
   await loadTabs();
@@ -72,49 +98,68 @@ onUnmounted(() => {
   chrome.tabs.onUpdated.removeListener(loadTabs);
 });
 
-const loadResourcesByTab = async (tabs: Tab[]) => {
-  let resources = await loadResourcesBatch(tabs);
+const handleSearch = (query: string) => {
+  searchQuery.value = query;
+};
 
-  return resources;
-}
+const filteredTabs = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return tabs.value;
+  }
+  const query = searchQuery.value.toLowerCase();
+  return tabs.value.filter((tab) => {
+    const title = tab.title?.toLowerCase() || '';
+    const url = tab.url?.toLowerCase() || '';
+    return title.includes(query) || url.includes(query);
+  });
+});
+
+// Computed property to check if all tabs are selected
+const allTabsSelected = computed(() => {
+  return (
+    filteredTabs.value.length > 0 &&
+    selectedTabs.value.length === filteredTabs.value.length
+  );
+});
 
 const loadTabs = async () => {
   chrome.tabs.query({ currentWindow: true }, async (tabResult) => {
     tabs.value = tabResult;
     if (selectAll.value) {
-      selectedTabs.value = [...tabs.value];
+      selectedTabs.value = [...filteredTabs.value];
     }
   });
 };
 
-const tabClickAction = (tab) => {
+const tabClickAction = (tab: Tab) => {
   if (tab.active) {
     chrome.windows.update(tab.windowId, { focused: true });
   } else {
-    chrome.tabs.update(tab.id, { active: true });
+    chrome.tabs.update(tab.id!, { active: true });
     chrome.windows.update(tab.windowId, { focused: true });
   }
 };
 
 const toggleSelectAll = () => {
   if (selectAll.value) {
-    selectedTabs.value = [...tabs.value];
+    selectedTabs.value = [...filteredTabs.value];
   } else {
     selectedTabs.value = [];
   }
 };
 
-const closeTab = (tab) => {
-  chrome.tabs.remove(tab.id, () => {
+const closeTab = (tab: Tab) => {
+  chrome.tabs.remove(tab.id!, () => {
     tabs.value = tabs.value.filter((t) => t.id !== tab.id);
     selectedTabs.value = selectedTabs.value.filter((t) => t.id !== tab.id);
   });
 };
 
 const openChatWithSelectedTabs = async () => {
-  await createChatEvent({ tabs: selectedTabs.value }) 
+  await appEvent('CREATE_CHAT', selectedTabs.value);
 };
 </script>
+
 
 <style scoped>
 .tab-list {
@@ -229,5 +274,54 @@ const openChatWithSelectedTabs = async () => {
 
 .open-chat-button:hover:not(:disabled) {
   background-color: #0056b3;
+}
+.scrollable-list {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+/* Action bar styles */
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Centers the items horizontally */
+  margin-top: 10px;
+}
+
+.action-bar input[type='checkbox'] {
+  margin-right: 5px;
+}
+
+.action-bar label {
+  margin-right: 20px; /* Adjust for spacing */
+}
+
+.action-button {
+  padding: 10px;
+  margin: 0 5px;
+  background-color: #007bff; /* Blue background */
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.action-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.action-button:hover:not(:disabled) {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Delete button specific styles */
+.delete-button {
+  background-color: #dc3545; /* Red background */
+}
+
+.delete-button:hover:not(:disabled) {
+  background-color: #c82333; /* Darker red on hover */
 }
 </style>

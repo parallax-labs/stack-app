@@ -1,66 +1,92 @@
 <template>
+  <!-- Tab List -->
   <div class="tab-list">
     <div
       v-for="tab in tabs"
       :key="tab.id"
       :class="['tab-item', { active: tab.active }]"
-      @click="tabClickAction(tab)"
     >
-      <img v-if="tab.favIconUrl" :src="tab.favIconUrl" alt="Favicon" class="favicon" />
-      <div class="tab-content">
+      <input
+        type="checkbox"
+        :value="tab"
+        v-model="localSelectedTabs"
+        class="tab-checkbox"
+      />
+      <img
+        v-if="tab.favIconUrl"
+        :src="tab.favIconUrl"
+        alt="Favicon"
+        class="favicon"
+        @error="onImageError"
+      />
+      <div class="tab-content" @click="tabClickAction(tab)">
         <div class="tab-title">{{ tab.title || 'Untitled' }}</div>
         <div class="tab-url">{{ tab.url }}</div>
+      </div>
+      <div class="tab-actions">
+        <span class="close-tab" @click.stop="closeTab(tab)">&times;</span>
       </div>
     </div>
   </div>
 </template>
 
-<script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import Collapsible from './Collapsible.vue';
-const props = defineProps<{
-  isCollapsed: bool;
-  tabs: chrome.tabs.Tab[] | undefined
-}>();
-const tabs = ref([]);
+<script lang="ts">
+import { defineComponent, computed } from 'vue';
 
-onMounted(() => {
-  loadTabs();
-  chrome.tabs.onActivated.addListener(loadTabs);
-  chrome.tabs.onUpdated.addListener(loadTabs);
+export default defineComponent({
+  name: 'TabList',
+  props: {
+    tabs: {
+      type: Array,
+      required: true,
+    },
+    selectedTabs: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  emits: ['update:selectedTabs'],
+  setup(props, { emit }) {
+    // Computed property for two-way binding
+    const localSelectedTabs = computed({
+      get: () => props.selectedTabs,
+      set: (value) => emit('update:selectedTabs', value),
+    });
+
+    const tabClickAction = (tab) => {
+      chrome.tabs.update(tab.id, { active: true });
+      chrome.windows.update(tab.windowId, { focused: true });
+    };
+
+    const closeTab = (tab) => {
+      chrome.tabs.remove(tab.id, () => {
+        // Tab removal will be handled by the parent component
+      });
+    };
+
+    // Handle image errors
+    const defaultIcon =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQImWNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=';
+
+    const onImageError = (event) => {
+      event.target.src = defaultIcon;
+    };
+
+    return {
+      localSelectedTabs,
+      tabClickAction,
+      closeTab,
+      onImageError,
+    };
+  },
 });
-
-onUnmounted(() => {
-  chrome.tabs.onActivated.removeListener(loadTabs);
-  chrome.tabs.onUpdated.removeListener(loadTabs);
-});
-
-const loadTabs = () => {
-  if (props.tabs) {
-    tabs.value = props.tabs;
-    return;
-  }
-  chrome.tabs.query({ currentWindow: true }, (tabResult) => {
-    tabs.value = tabResult;
-  });
-};
-
-const tabClickAction = (tab) => {
-  if (tab.active) {
-    chrome.windows.update(tab.windowId, { focused: true });
-  } else {
-    chrome.tabs.update(tab.id, { active: true });
-    chrome.windows.update(tab.windowId, { focused: true });
-  }
-};
 </script>
 
 <style scoped>
+/* Same styles as before */
 .tab-list {
   display: flex;
   flex-direction: column;
-  max-height: 30vh;
-  overflow-y: auto;
 }
 
 .tab-item {
@@ -84,6 +110,10 @@ const tabClickAction = (tab) => {
   background-color: #f5f5f5;
 }
 
+.tab-checkbox {
+  margin-right: 10px;
+}
+
 .favicon {
   width: 16px;
   height: 16px;
@@ -93,6 +123,7 @@ const tabClickAction = (tab) => {
 .tab-content {
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
 }
 
 .tab-title {
@@ -104,5 +135,23 @@ const tabClickAction = (tab) => {
 .tab-url {
   font-size: 12px;
   color: #999;
+}
+
+.tab-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.close-tab {
+  font-size: 14px;
+  color: #ccc;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.3s;
+}
+
+.close-tab:hover {
+  color: #f00;
 }
 </style>

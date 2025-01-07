@@ -32,7 +32,7 @@
   "background": {
     "service_worker": "dist/background.js"
   },
-  "permissions": ["sidePanel", "scripting", "storage", "tabs", "activeTab", "webRequest", "bookmarks"],
+  "permissions": ["sidePanel", "scripting", "storage", "tabs", "activeTab", "webRequest", "bookmarks", "history"],
   "host_permissions": ["<all_urls>"],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"

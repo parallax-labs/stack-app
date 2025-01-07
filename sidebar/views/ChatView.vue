@@ -1,9 +1,9 @@
 <template>
-    <!-- Header Section -->
-    <div class="p-4 bg-blue-500 text-white shadow-md">
-      <h1 class="text-2xl font-bold">{{ chatInfo?.name || 'Untitled Chat' }}</h1>
-      <p class="text-sm">{{ chatInfo?.created_at ? new Date(chatInfo.created_at).toLocaleString() : 'Unknown Date' }}</p>
-    </div>
+  <!-- Header Section -->
+  <div class="p-4 bg-blue-500 text-white shadow-md">
+    <h1 class="text-2xl font-bold">{{ chatInfo?.name || 'Untitled Chat' }}</h1>
+    <p class="text-sm">{{ chatInfo?.created_at ? new Date(chatInfo.created_at).toLocaleString() : 'Unknown Date' }}</p>
+  </div>
   <div class="p-4 bg-white rounded-lg shadow">
     <!-- Sub-Tabs for Monitoring -->
     <div class="flex border-b">
@@ -130,6 +130,7 @@ const activeSubTab = ref("chat");
 let agent: Agent;
 
 onMounted(async () => {
+  console.log(props);
   chatInfo.value = await loadChatInfo(props.chatId);
   const history = await loadChatHistory(props.chatId);
   if (history && Array.isArray(history)) {

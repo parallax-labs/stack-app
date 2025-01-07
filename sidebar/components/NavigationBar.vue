@@ -44,7 +44,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { createBookmarkEvent, createChatSessionEvent, addResourceToChat, createChatInDB, upsertResource } from '../db';
+import { createBookmarkEvent, addResourceToChat, createChatInDB, upsertResource } from '../db';
 
 const router = useRouter();
 const route = useRoute();

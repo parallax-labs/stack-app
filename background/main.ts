@@ -46,16 +46,16 @@ async function updateIcon(tabId: number, changeInfo: any, tab: Partial<{ url: st
 //   }
 // });
 //
-// chrome.webRequest.onCompleted.addListener(
-//   (details) => {
-//     // Additional logic can be implemented here
-//     chrome.runtime.sendMessage({
-//        type: "REQUEST_COMPLETE",
-//        payload: details,
-//      });
-//   },
-//   { urls: ["<all_urls>"] }
-// );
+chrome.webRequest.onCompleted.addListener(
+  (details) => {
+    // Additional logic can be implemented here
+    chrome.runtime.sendMessage({
+       type: "REQUEST_COMPLETE",
+       payload: details,
+     });
+  },
+  { urls: ["<all_urls>"] }
+);
 chrome.tabs.onActivated.addListener(({ tabId }) => {
   chrome.tabs.get(tabId, (tab) => {
     if (chrome.runtime.lastError) {

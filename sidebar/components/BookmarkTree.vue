@@ -14,7 +14,7 @@
         <!-- Action buttons -->
         <button
           class="text-sm text-blue-500 hover:underline"
-          @click="$emit('chat', node.id)"
+          @click="$emit('chat', node)"
         >
           Chat
         </button>

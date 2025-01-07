@@ -3,7 +3,7 @@ import { surrealdbWasmEngines } from '@surrealdb/wasm';
 import generateName from './names';
 import { encryptApiKey } from './encryption';
 import { Tab } from './bookmark_event';
-import { findPathToUrl } from './browser';
+import { findPathToUrl, getBookmarks } from './browser';
 // Singleton instance of SurrealDB
 export const db = new Surreal({
   engines: surrealdbWasmEngines(),
@@ -289,10 +289,6 @@ export async function importBookmarkTreeInBatches(
         parentId: parentId || undefined,
         dateAdded: node.dateAdded || Date.now(),
       });
-      // todo: subchats
-      // if (parentId) {
-      //   relationshipsBatch.push({ parentId, childId: node.id });
-      // }
       // Recursively process child nodes
       if (node.children) {
         for (const child of node.children) {
@@ -399,21 +395,6 @@ export async function stackAppEvent(table: string, message: any): Promise<any> {
   }
 }
 
-export async function createChatSessionEvent(name: string, properties: Record<string, any>): Promise<void> {
-  await stackAppEvent('app_event', {
-    name,
-    type: 'CREATE_CHAT_SESSION',
-    properties
-  })
-}
-
-export async function createChatEvent(properties: Record<string, any>): Promise<void> {
-  await stackAppEvent('app_event', {
-    type: 'CREATE_CHAT',
-    properties
-  })
-}
-
 export async function renameChatEvent(name: string, properties: Record<string, any>): Promise<void> {
   await stackAppEvent('app_event', {
     name,
@@ -453,7 +434,7 @@ export async function addResourceToChats(resourceId: string[], chats: string[]) 
       console.error('Error upserting resource:', error);
     }
 }
-export async function saveResource(chatId: string, { title, url }: { title: string; url: string; }): Promise<Resource | undefined> {
+export async function saveResource(chatId: string, { title, url }: { title: string; url: string }): Promise<Resource | undefined> {
   try {
     // console.log("Upserting resource:", title, url, "for chatId:", chatId);
 
@@ -495,16 +476,6 @@ export async function saveResource(chatId: string, { title, url }: { title: stri
   }
 }
 
-// Create a new component and associate it with a stack
-export async function createComponent(component: Component): Promise<void> {
-  try {
-    await db.create("component", component);
-    console.log(`Component "${component.name}" created successfully`);
-  } catch (error) {
-    console.error("Error creating component:", error);
-  }
-}
-
 // Load components associated with a specific stack
 export async function loadComponents(stackId: string): Promise<Component[]> {
   try {
@@ -518,7 +489,9 @@ export async function loadComponents(stackId: string): Promise<Component[]> {
 
 export async function loadChatInfo(id: string): Promise<any> {
   try {
+    console.log("load chat info", id);
     const [result] = await db.query<Chat[]>(`SELECT * from chat where id = ${id}`);
+    console.log(result);
     return result[0];
   } catch (error) {
     console.error(`Error loading chat info ${id}:`, error);
@@ -736,3 +709,16 @@ export const createImport = async (source: string = 'browser_bookmarks', data?: 
     console.error('Failed to create chat:', err)
   }
 }
+
+export const getRuntimeEvents = async (eventType: string) => {
+
+  try {
+    let [result]: any = await db.query(`select * from runtime_event where type = '${eventType}'`);
+    console.log(result);
+    return result ?? [];
+  } catch (error) {
+    console.log(error);
+    throw error;
+  } 
+}
+
