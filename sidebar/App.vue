@@ -1,5 +1,8 @@
 <template>
   <nav class="fixed top-0 left-0 w-full z-50 bg-white">
+    <header class="flex justify-center items-center py-4 bg-white">
+      <h1 class="text-2xl font-bold">📦 Stack</h1>
+    </header>
     <div class="flex space-x-4 border-b justify-center">
       <router-link to="/" class="tab-link" active-class="tab-link-active">
         🏠
@@ -18,7 +21,7 @@
       </router-link>
     </div>
   </nav>
-  <div class="pt-8">
+  <div class="pt-24">
     <router-view />
   </div>
 </template>

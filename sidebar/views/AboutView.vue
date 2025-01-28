@@ -1,14 +1,13 @@
 <template>
   <div class="min-h-screen bg-white shadow-md rounded-lg p-6 max-w-5xl mx-auto">
     <header class="text-center mb-6">
-      <h1 class="text-4xl font-bold mb-2">📦 Stack</h1>
-      <p class="text-gray-600">
-        Organize and manage links to repositories, documentation, logs, and monitors by application.
-        Compatible with Backstage YAML for easy integration.
-      </p>
+        <p class="text-gray-600">
+          <strong>📦 Stack</strong> is your intelligent, agile companion for managing browser tabs, history, bookmarks, and sessions—all while ensuring your data stays secure and private.
+        </p>
     </header>
 
     <div class="max-w-md mx-auto">
+      <h1>OpenAI</h1>
       <!-- API Key Form -->
       <form @submit.prevent="handleSaveApiKey" class="mb-6">
         <div class="mb-4">

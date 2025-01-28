@@ -94,6 +94,10 @@ export interface Chat extends Record<string, unknown> {
   [key: string]: unknown; // Index signature for compatibility
 }
 
+export async function updateChatInDB(chat: any) {
+  console.log(chat);
+}
+
 // Function to check if the page is saved in SurrealDB
 export async function isPageSaved(url: string): Promise<boolean> {
   console.log(`is page saved? ${url}`);
