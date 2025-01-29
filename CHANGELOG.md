@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.130](https://github.com/parallaxisjones/lab-monorepo/compare/v1.2.129...v1.2.130) (2025-01-29)
+
+
+### Bug Fixes
+
+* **stack_app:** test commit ([40fe4f2](https://github.com/parallaxisjones/lab-monorepo/commit/40fe4f2e11cb5b680b07c780f9160ad6dd849344))
+
 ### [1.2.129](https://github.com/parallaxisjones/lab-monorepo/compare/v1.2.128...v1.2.129) (2025-01-29)
 
 ### [1.2.128](https://github.com/parallaxisjones/lab-monorepo/compare/v1.2.127...v1.2.128) (2025-01-29)

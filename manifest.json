@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Deployment Stack Navigator",
-  "version": "1.2.129",
+  "version": "1.2.130",
   "description": "Navigate software deployment stacks with quick links.",
   "commands": {
     "bookmark_resource": {
