@@ -31,6 +31,7 @@
   "scripts": {
     "lint": "echo 'lint'",
     "build": "vite build",
-    "test": "echo 'test'"
+    "test": "echo 'test'",
+    "foo": "echo 'bar'"
   }
 }
