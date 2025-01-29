@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.84](https://github.com/parallaxisjones/lab-monorepo/compare/v1.1.83...v1.1.84) (2025-01-29)
+
 ### [1.1.83](https://github.com/parallaxisjones/lab-monorepo/compare/v1.1.82...v1.1.83) (2025-01-29)
 
 ### [1.1.82](https://github.com/parallaxisjones/lab-monorepo/compare/v1.1.81...v1.1.82) (2025-01-29)
