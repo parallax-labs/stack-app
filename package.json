@@ -30,6 +30,7 @@
   },
   "scripts": {
     "lint": "echo 'lint'",
-    "build": "vite built"
+    "build": "vite built",
+    "test": "echo 'test'"
   }
 }
