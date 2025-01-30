@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Deployment Stack Navigator",
-  "version": "1.2.135",
-  "description": "Navigate software deployment stacks with quick links.",
+  "name": "Stack 📦",
+  "version": "1.2.134",
+  "description": "Navigate Bookmarks and Tabs with parkour 🤸🛒.",
   "commands": {
     "bookmark_resource": {
       "suggested_key": {
