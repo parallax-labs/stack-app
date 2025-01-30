@@ -6,7 +6,6 @@ on:
     branches:
       - main
     paths:
-      - 'apps/stack-app/**'
       - '.github/workflows/*.yml'
 
 jobs:
@@ -27,25 +26,20 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        working-directory: ./apps/stack-app
         run: npm ci
 
       - name: Run Lint
-        working-directory: ./apps/stack-app
         run: npm run lint
 
       - name: Run Tests
-        working-directory: ./apps/stack-app
         run: npm run test
 
       - name: Build Extension
-        working-directory: ./apps/stack-app
         env:
           NODE_ENV: 'production'
         run: npm run build
 
       - name: Package Extension
-        working-directory: ./apps/stack-app
         run: |
           cp manifest.json dist
           cd dist
@@ -61,7 +55,6 @@ jobs:
       # Bump Version and Create Tag
       - name: Bump Version and Create Tag
         id: bump_version
-        working-directory: ./apps/stack-app
         run: |
           npm install -g standard-version
           standard-version --no-verify --commit-all --release-as patch -m "chore(release): %s [skip ci]"
@@ -98,79 +91,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
-
-# name: Stack App CI
-#
-# on:
-#   workflow_dispatch:
-#   push:
-#     branches:
-#       - main
-#     paths:
-#       - 'apps/stack-app/**'
-#       - '.github/workflows/build-test.yml'
-#
-# jobs:
-#   build-and-test:
-#     if: "!contains(github.event.head_commit.message, '[skip ci]')"
-#     name: Build and Test Chrome Extension
-#     runs-on: ubuntu-latest
-#
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v3
-#         with:
-#           token: ${{ secrets.PAT_TOKEN }}
-#           fetch-depth: 0  # Fetch all history for accurate versioning
-#
-#       - name: Setup Node.js Environment
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: '20'
-#
-#       - name: Install Dependencies
-#         working-directory: ./apps/stack-app
-#         run: npm install
-#
-#       - name: Run Lint
-#         working-directory: ./apps/stack-app
-#         run: npm run lint
-#
-#       - name: Run Tests
-#         working-directory: ./apps/stack-app
-#         run: npm run test
-#
-#       - name: Build Extension
-#         working-directory: ./apps/stack-app
-#         env:
-#           NODE_ENV: 'production'
-#         run: npm run build
-#
-#       # Configure Git User
-#       - name: Configure Git User
-#         run: |
-#           git config user.email "4815162342@lost.com"
-#           git config user.name "John Locke"
-#
-#       # Bump Version and Create Tag
-#       - name: Bump Version and Create Tag
-#         working-directory: ./apps/stack-app
-#         run: |
-#           # Install standard-version if not already installed
-#           npm install -g standard-version
-#
-#           # Run standard-version to bump version and create tag
-#           standard-version --no-verify --commit-all --release-as patch -m "chore(release): %s [skip ci]"
-#
-#       # List Local Tags
-#       - name: List Local Git Tags
-#         run: git tag
-#
-#       # Push the changes and tags
-#       - name: Push Changes and Tags
-#         run: |
-#           git push origin main --tags
-#
-#       # List Remote Tags
-#       - name: List Remote Git Tags
-#         run: git ls-remote --tags origin
