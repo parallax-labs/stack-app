@@ -27,7 +27,24 @@ jobs:
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@main
 
+      # Add steps to clean up package manager conflicts
+      - name: Clean package manager files
+        run: |
+          rm -f package-lock.json
+          rm -rf node_modules
+          yarn cache clean
+
+      # Add network configuration step
+      - name: Configure Yarn
+        run: |
+          yarn config set network-timeout 600000
+          yarn config set registry "https://registry.yarnpkg.com"
+
       - name: Build Extension
+        env:
+          NODE_EXTRA_CA_CERTS: /etc/ssl/certs/ca-certificates.crt
+          SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
+          SYSTEM_CERTIFICATE_PATH: /etc/ssl/certs/ca-certificates.crt
         run: nix build
 
       # Configure Git User (only on main branch pushes)
