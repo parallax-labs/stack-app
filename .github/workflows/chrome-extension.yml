@@ -37,7 +37,7 @@ jobs:
         env:
           NODE_EXTRA_CA_CERTS: /etc/ssl/certs/ca-certificates.crt
           SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
-        run: nix build --print-build-logs
+        run: nix build . --print-build-logs
 
       # Configure Git User (only on main branch pushes)
       - name: Configure Git User

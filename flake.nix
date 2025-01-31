@@ -19,11 +19,9 @@
             nodePackages.vite
           ];
           
-          # Add SSL certificates and DNS configuration for the dev shell
           shellHook = ''
             export NODE_EXTRA_CA_CERTS="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
             export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-            export SYSTEM_CERTIFICATE_PATH="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
           '';
         };
 
@@ -32,25 +30,35 @@
           version = "0.1.0";
           src = ./.;
 
-          buildInputs = with pkgs; [
+          yarnDeps = pkgs.fetchYarnDeps {
+            yarnLock = ./yarn.lock;
+            sha256 = "sha256-n+vmzJk260pfulyAhyjNkhAJXULeqvEV+HF8Sbr8xl8=";
+          };
+
+          nativeBuildInputs = with pkgs; [
             nodejs_20
-            nodePackages.yarn
+            yarn
             zip
           ];
 
-          buildPhase = ''
+          configurePhase = ''
             export HOME=$(mktemp -d)
-            # Add SSL certificates
+            # Copy dependencies to writable directory
+            cp -r $yarnDeps $HOME/deps
+            chmod -R u+w $HOME/deps
+          '';
+
+          buildPhase = ''
             export NODE_EXTRA_CA_CERTS="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-            export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-            export SYSTEM_CERTIFICATE_PATH="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
             
-            # Ensure network configuration
-            yarn config set network-timeout 600000
-            yarn config set registry "https://registry.yarnpkg.com"
+            # Point Yarn to the writable dependency directory
+            yarn config set yarn-offline-mirror "$HOME/deps"
             
-            yarn install
-            yarn build 
+            # Install using offline dependencies
+            yarn install --frozen-lockfile --ignore-engines --ignore-scripts
+            
+            # Build project
+            yarn build
           '';
 
           installPhase = ''
@@ -58,14 +66,12 @@
             cp -r dist/* $out/unpacked/
             cp manifest.json $out/unpacked/
             
-            # Copy icons
             mkdir -p $out/unpacked/icons
             cp -r icons/* $out/unpacked/icons/
             
-            # Create the zip file
             cd $out/unpacked
             zip -r $out/stack-app.zip ./*
           '';
         };
       });
-} 
+}
