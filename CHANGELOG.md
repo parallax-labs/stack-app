@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.139](https://github.com/parallax-labs/stack-app/compare/v1.2.138...v1.2.139) (2025-01-31)
+
 ### [1.2.138](https://github.com/parallax-labs/stack-app/compare/v1.2.137...v1.2.138) (2025-01-31)
 
 ### [1.2.137](https://github.com/parallax-labs/stack-app/compare/v1.2.136...v1.2.137) (2025-01-30)
