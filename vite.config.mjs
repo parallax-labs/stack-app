@@ -13,9 +13,9 @@ export default defineConfig({
         background: 'background/main.ts'
       },
       output: {
-        entryFileNames: '[name].js',       // No hash in entry filenames
-        chunkFileNames: '[name].js',       // No hash in chunk filenames
-        assetFileNames: '[name][extname]', // No hash in asset filenames
+        entryFileNames: '[name].js',
+        chunkFileNames: 'chunks/[name]-[hash].js', // Move chunks to a subdirectory and ensure no leading underscores
+        assetFileNames: 'assets/[name][extname]', // Move assets to a subdirectory
       },
     }
     //,
@@ -32,6 +32,8 @@ export default defineConfig({
       "top-level-await": true,
     },
   },
+  // Add cache configuration for Nix builds
+  cacheDir: '.vite',
 });
 
 
