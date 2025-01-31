@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.139](https://github.com/parallax-labs/stack-app/compare/v1.2.138...v1.2.139) (2025-01-31)
+
+### [1.2.138](https://github.com/parallax-labs/stack-app/compare/v1.2.137...v1.2.138) (2025-01-31)
+
+### [1.2.137](https://github.com/parallax-labs/stack-app/compare/v1.2.136...v1.2.137) (2025-01-30)
+
+### 1.2.136 (2025-01-30)
+
+
+### Bug Fixes
+
+* **stack_app:** test commit ([aa674d1](https://github.com/parallax-labs/stack-app/commit/aa674d11a2417ca91962c2ba79bbdba6c0248ce2))
+
 ### [1.2.135](https://github.com/parallaxisjones/lab-monorepo/compare/v1.2.134...v1.2.135) (2025-01-30)
 
 ### [1.2.134](https://github.com/parallaxisjones/lab-monorepo/compare/v1.2.133...v1.2.134) (2025-01-29)
