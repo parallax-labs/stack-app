@@ -9,7 +9,7 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       input: {
-        sidebar: 'sidebar/main.ts',
+        sidebar: 'sidebar/sidebar.html',
         background: 'background/main.ts'
       },
       output: {
