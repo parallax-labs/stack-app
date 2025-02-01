@@ -2,7 +2,7 @@
 
 const sgMail = require('@sendgrid/mail');
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
-const to = 'stack-testers@googlegroups.com';
+const to = 'parker.emailaddress@gmail.com';
 const from = 'noreply@stack-app.cloud';
 const RELEASE_TAG = process.env.RELEASE_TAG || '';
 const RELEASE_NAME = process.env.RELEASE_NAME || '';
