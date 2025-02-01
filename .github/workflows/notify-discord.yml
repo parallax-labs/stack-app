@@ -38,7 +38,7 @@ jobs:
         working-directory: ./scripts
 
       - name: Send Email with Release Notes
-        run: node sendgrid.js
+        run: node sendgrid_google_group.js
         working-directory: ./scripts
         env:
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
