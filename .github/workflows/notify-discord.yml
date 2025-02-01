@@ -1,4 +1,4 @@
-name: Notify Discord on Release
+name: Notify on Release
 
 on:
   release:
@@ -21,3 +21,27 @@ jobs:
           footer_timestamp: true
           max_description: '4096'
           reduce_headings: true
+
+  send_email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install SendGrid Mail Package
+        run: npm install @sendgrid/mail
+        working-directory: ./scripts
+
+      - name: Send Email with Release Notes
+        run: node sendgrid.js
+        working-directory: ./scripts
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
