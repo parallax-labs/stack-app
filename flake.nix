@@ -1,58 +1,52 @@
 {
-  description = "Stack App - Vue.js Browser Extension";
+  description = "Stack App Chrome Extension";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
   };
-
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-      in
-      {
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            nodejs_20
-            nodePackages.yarn
-            nodePackages.vite
-          ];
-        };
-
-        packages.default = pkgs.stdenv.mkDerivation {
-          name = "stack-app";
-          version = "0.1.0";
+        node-modules = pkgs.mkYarnPackage {
+          name = "node-modules";
           src = ./.;
-
-          buildInputs = with pkgs; [
-            nodejs_20
-            nodePackages.yarn
-            zip
-          ];
-
+        };
+        stackapp = pkgs.stdenv.mkDerivation {
+          name = "stack-app";
+          src = ./.;
+          buildInputs = [pkgs.yarn node-modules pkgs.zip ];
           buildPhase = ''
-            export HOME=$(mktemp -d)
-            # Add SSL certificates
-            export NODE_EXTRA_CA_CERTS="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-            export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-            yarn install
-            yarn build 
+            ln -s ${node-modules}/libexec/stack-app/node_modules node_modules
+            ${pkgs.yarn}/bin/yarn build
           '';
-
           installPhase = ''
             mkdir -p $out/unpacked
             cp -r dist/* $out/unpacked/
             cp manifest.json $out/unpacked/
             
-            # Copy icons
             mkdir -p $out/unpacked/icons
             cp -r icons/* $out/unpacked/icons/
             
-            # Create the zip file
             cd $out/unpacked
             zip -r $out/stack-app.zip ./*
           '';
+
+            meta = with pkgs.lib; {
+              description = "Stack App Browser Extension";
+              homepage = "https://stackapp.cloud";
+              license = licenses.mit;
+              platforms = platforms.all;
+            };
+
         };
-      });
-} 
+      in 
+        {
+          packages = {
+            node-modules = node-modules;
+            default = stackapp;
+          };
+        }
+    );
+}

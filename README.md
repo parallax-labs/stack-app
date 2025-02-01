@@ -1,3 +1,5 @@
+![Release Extension](https://github.com/stack-app/stack-app/actions/workflows/release.yml/badge.svg) 
+
 # Stack 📦  - Intelligent Tab & Bookmark Manager
 
 Stack 📦 is a Chrome extension that helps you manage your tabs and bookmarks through a natural conversational interface. It combines powerful tab/bookmark organization features with an AI assistant to help you stay productive.

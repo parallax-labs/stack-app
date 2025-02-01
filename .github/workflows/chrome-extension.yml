@@ -5,88 +5,85 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '.github/workflows/*.yml'
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-test-and-release:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_TOKEN }}
           fetch-depth: 0
 
-      - name: Setup Node.js Environment
-        uses: actions/setup-node@v3
+      - name: Install Nix
+        uses: cachix/install-nix-action@v25
         with:
-          node-version: '20'
+          nix_path: nixpkgs=channel:nixos-unstable
 
-      - name: Install Dependencies
-        run: npm ci
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v14
+        with:
+          name: parallaxisjones  # Replace with your cachix cache name
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
-      - name: Run Lint
-        run: npm run lint
-
-      - name: Run Tests
-        run: npm run test
-
+      # Add steps to clean up package manager conflicts
       - name: Build Extension
         env:
-          NODE_ENV: 'production'
-        run: npm run build
+          NODE_EXTRA_CA_CERTS: /etc/ssl/certs/ca-certificates.crt
+          SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
+        run: nix build . --print-build-logs
 
-      - name: Package Extension
-        run: |
-          cp manifest.json dist
-          cd dist
-          zip -r ../extension.zip ./*
-          cd ..
-
-      # Configure Git User
+      # Configure Git User (only on main branch pushes)
       - name: Configure Git User
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git config user.email "4815162342@lost.com"
           git config user.name "John Locke"
 
-      # Bump Version and Create Tag
+      # Bump Version and Create Tag (only on main branch pushes)
       - name: Bump Version and Create Tag
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         id: bump_version
         run: |
           npm install -g standard-version
           standard-version --no-verify --commit-all --release-as patch -m "chore(release): %s [skip ci]"
           NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "::set-output name=new_version::$NEW_VERSION"
-          echo "::set-output name=new_tag::v$NEW_VERSION"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
 
-      # Push Changes and Tags
+      # Push Changes and Tags (only on main branch pushes)
       - name: Push Changes and Tags
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git push origin main --tags
 
-      # Create GitHub Release
+      # Create GitHub Release (only on main branch pushes)
       - name: Create GitHub Release
-        id: create_release   # Added ID here
-        if: always()
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ steps.bump_version.outputs.new_tag }}
-          release_name: "Release v${{ steps.bump_version.outputs.new_version }}"
+          tag_name: ${{ steps.bump_version.outputs.tag }}
+          release_name: "Release ${{ steps.bump_version.outputs.tag }}"
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
-      # Upload Release Asset
+      # Upload Release Asset (only on main branch pushes)
       - name: Upload Release Asset
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./extension.zip
-          asset_name: extension-v${{ steps.bump_version.outputs.new_version }}.zip
+          asset_path: ./result/stack-app.zip
+          asset_name: extension-${{ steps.bump_version.outputs.tag }}.zip
           asset_content_type: application/zip
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
