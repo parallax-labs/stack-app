@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Stack 📦",
-  "version": "1.2.142",
+  "version": "1.2.143",
   "description": "Navigate Bookmarks and Tabs with parkour 🤸🛒.",
   "commands": {
     "bookmark_resource": {
