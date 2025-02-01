@@ -16,7 +16,7 @@
         stackapp = pkgs.stdenv.mkDerivation {
           name = "stack-app";
           src = ./.;
-          buildInputs = [pkgs.yarn node-modules];
+          buildInputs = [pkgs.yarn node-modules pkgs.zip ];
           buildPhase = ''
             ln -s ${node-modules}/libexec/stack-app/node_modules node_modules
             ${pkgs.yarn}/bin/yarn build
