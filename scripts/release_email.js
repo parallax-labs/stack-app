@@ -81,7 +81,7 @@ Parker Jones
 const from = (name, address) => `${name} <${address}>`;
 
 // Email options
-export default (RELEASE_NAME, RELEASE_TAG, RELEASE_BODY) => ({
+module.exports  = (RELEASE_NAME, RELEASE_TAG, RELEASE_BODY) => ({
   from: from("Parker Jones", "parker.emailaddress@gmail.com"),
   to: "stack-testers@googlegroups.com",
   subject: subject(RELEASE_NAME, RELEASE_TAG, RELEASE_BODY),
