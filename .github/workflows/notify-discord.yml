@@ -34,7 +34,7 @@ jobs:
           node-version: '20'
 
       - name: Install SendGrid Mail Package
-        run: npm install @sendgrid/mail
+        run: npm install 
         working-directory: ./scripts
 
       - name: Send Email with Release Notes
