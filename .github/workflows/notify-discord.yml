@@ -13,9 +13,9 @@ jobs:
         with:
           webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
           color: "2105893"  # Optional: Customize the embed color
-          username: "Release Bot"  # Optional: Customize the bot's username
+          username: "Stack App Release"  # Optional: Customize the bot's username
           avatar_url: "https://e7.pngegg.com/pngimages/737/804/png-clipart-ultron-logo-marvel-comics-chitauri-hydra-ultron-face-fictional-characters.png"  # Optional: Customize the bot's avatar
-          content: "@everyone"  # Optional: Mention everyone in the channel
+          content: "@testers a new version of stack app has been released"  # Optional: Mention everyone in the channel
           footer_title: "Release Notes"
           footer_icon_url: "https://e7.pngegg.com/pngimages/737/804/png-clipart-ultron-logo-marvel-comics-chitauri-hydra-ultron-face-fictional-characters.png"
           footer_timestamp: true
@@ -38,10 +38,12 @@ jobs:
         working-directory: ./scripts
 
       - name: Send Email with Release Notes
-        run: node sendgrid_google_group.js
+        run: node send_gmail.js
         working-directory: ./scripts
         env:
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          #SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_USER_PASSWORD }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           RELEASE_NAME: ${{ github.event.release.name }}
           RELEASE_BODY: ${{ github.event.release.body }}
