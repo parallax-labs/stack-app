@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.145](https://github.com/parallax-labs/stack-app/compare/v1.2.144...v1.2.145) (2025-02-04)
+
+
+### Bug Fixes
+
+* path typo ([81c4a99](https://github.com/parallax-labs/stack-app/commit/81c4a99b2da9f921fc87d3e1610692a072802d82))
+
 ### [1.2.144](https://github.com/parallax-labs/stack-app/compare/v1.2.143...v1.2.144) (2025-02-01)
 
 ### [1.2.143](https://github.com/parallax-labs/stack-app/compare/v1.2.142...v1.2.143) (2025-02-01)
